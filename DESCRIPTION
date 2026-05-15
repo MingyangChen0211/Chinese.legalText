@@ -1,0 +1,24 @@
+Type: Package
+Package: Chinese.legalText
+Title: A Package for Analyzing CJO Criminal Documents
+Version: 1.0.0
+Author: Mingyang Chen and Zhipeng Wu
+Maintainer: Mingyang Chen <cmy0211@yeah.net>
+Description: This package is for analyzing criminal sentencing documents. 
+    We write several functions to help a starter to quickly learn how to complete an empirical analysis on CJO data. Several research has been using CJO data, but most of them would not report how they get data from their documents. According to our interview, many scholars are still using research assistant to read documents or read on their own, or ask help from certain companies, computer scientists. These methods are expensive, time-consuming and to some extent, prevent scholars to conduct futher complex research. 
+    To help legal and criminological scholars using CJO data, we develop this package. We provide several baseline methods for users, and you are free to use all functions here. This package is not only limited to analyzing Chinese criminal texts. You can use this package to calculate similarity of your own text data. A potential application is to calculate the similarity of patent documents, or extract legal factors in civil law documents. Please note that this package can not help you do everything, but can really save your time and reduce your study costs. Also it can be used to replicate other studies. 
+    We hope legal and criminological researchers from China, Taiwan, Macau, Hongkong and other regions using Chinese or familiar with Chinese to conduct replication studies for existing CJO research using this open-source package. We hope to build an OPEN-SOURCE Chinese legal and criminological research community! 
+    !!NOTE UNICODE!!: All Chinese character in the code would be presented in the form of unicode. You can simply use original Chinese character. We use unicode to prevent the Warning when building this package and make sure it can be uploaded to CRAN. 
+    !!FURTHER EXPLANATION!!: For example, the "\u6211\u662f\u4e00\u4e2a\u5f8b\u5e08" is a Chinese sentence meaning that "I am a lawyer". Users can simply type the Chinese instead of unicode form when you are using this package in your local environment. To understand the example we provide, you need to print the unicode in your local R console. For example, if you want to know "\u6211\u662f\u4e00\u4e2a\u5f8b\u5e08"'s corresponding Chinese content, you need to use print function in R. 
+License: GPL-3
+Depends: 
+    R (>= 3.5)
+Imports: 
+    chinese.misc,
+    jiebaR,
+    stringr,
+    tm,
+    stringi,
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
