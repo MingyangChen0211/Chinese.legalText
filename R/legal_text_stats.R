@@ -781,27 +781,27 @@ ngenderR_CN <- function(judgename) {
 }
 
 
-# cut judgements into several parts (facts, reasoning, sentencing, articles)
+# cut judgements into several parts (facts, reasoning, sentencing, legal articles)
 #' Cutting Function - Single Case
 #'
-#' This function is to split documents into three parts: "facts", "reasoning", and "appendix".
+#' This function is to split documents into four parts: "facts", "reasoning", and "decision" and "law".
 #' This function is only for single case.
-#' You are required to input a long text, and this function will automatically cut this document into three parts.
-#' You can use `for` or `lapply` function or use Cutting Function - DataFrame (`split_judgment_df`) to deal with a set of cases
+#' You are required to input a long text, and this function will automatically cut this document into four parts.
+#' You can use \code{for} or \code{lapply} function or use Cutting Function - DataFrame (\code{split_judgment_df}) to deal with a set of cases
 #' As for the cutting logic, please refer to our paper "Judges are trained as good explainers but maligned sentencers: a text similarity approach"
 #'
 #' @param text the document characters.
-#' @return `FACTS`, `REASON` and `APPENDIX`.
+#' @return `FACTS`, `REASON`, `DECISION` and `LAW`.
 #'
 #' @examples
-#' text <- "\u7ecf\u5ba1\u7406\u67e5\u660e\uff1a\u88ab\u544a\u4eba\u76d7\u7a83\u3002\u672c\u9662\u8ba4\u4e3a\u6784\u6210\u76d7\u7a83\u7f6a\u3002\u5224\u51b3\u5982\u4e0b\uff1a\u6709\u671f\u5f92\u5211\u3002"
+#' text <- "\u7ecf\u5ba1\u7406\u67e5\u660e\uff1a\u76d7\u7a83\u884c\u4e3a\u3002\u672c\u9662\u8ba4\u4e3a\u662f\u72af\u7f6a\u3002\u4f9d\u7167\u300a\u5211\u6cd5\u300b\u7b2c\u4e09\u5341\u6761\uff0c\u300a\u5211\u4e8b\u8bc9\u8bbc\u6cd5\u300b\u7b2c\u4e8c\u5341\u6761\uff0c\u5224\u51b3\u5982\u4e0b:\u4e94\u5e74\u6709\u671f\u5f92\u5211"
 #' result <- split_judgment(text)
-#' print(result$FACTS)
+#' print(result)
 #'
 #' @section Unicode Meaning in Examples:
 #' \tabular{ll}{
 #'  Unicode \tab Meaning \cr
-#' \\u7ecf\\u5ba1...\\u3002\\ \tab "经审理查明：被告人盗窃。本院认为构成盗窃罪。判决如下：有期徒刑。" \cr
+#' \\u7ecf\\u5ba1...\\u5211 \tab "经审理查明：盗窃行为。本院认为是犯罪。依照《刑法》第三十条，《刑事诉讼法》第二十条，判决如下:五年有期徒刑" \cr
 #'}
 #'
 #' @importFrom stringi stri_match_all_regex stri_match_first_regex stri_detect_regex
@@ -810,7 +810,7 @@ ngenderR_CN <- function(judgename) {
 split_judgment <- function(text) {
 
   if (!is.character(text) || length(text) != 1L || nchar(trimws(text)) == 0L) {
-    return(list(FACTS = "", REASON = "", APPENDIX = ""))
+    return(list(FACTS = "", REASON = "", DECISION = ""))
   }
 
   # cutting rules
@@ -824,9 +824,9 @@ split_judgment <- function(text) {
   ## reasoning
   reason_pattern <- "\u672c\\s*\u9662\\s*\u8ba4\\s*\u4e3a[\uff0c,:]?"
   ## legal appendix: start
-  appendix_primary <- c("\u5224\\s*\u51b3\\s*\u5982\\s*\u4e0b[\uff1a:]", "\u88c1\\s*\u5b9a\\s*\u5982\\s*\u4e0b[\uff1a:]")
+  decision_primary <- c("\u5224\\s*\u51b3\\s*\u5982\\s*\u4e0b[\uff1a:]", "\u88c1\\s*\u5b9a\\s*\u5982\\s*\u4e0b[\uff1a:]")
   ## legal appendix: end
-  appendix_fallback <- c("\u5982\\s*\u4e0d\\s*\u670d\\s*\u672c\\s*\u5224\\s*\u51b3", "\u5ba1\\s*\u5224\\s*\u957f[\uff1a:\\s]")
+  decision_fallback <- c("\u5982\\s*\u4e0d\\s*\u670d\\s*\u672c\\s*\u5224\\s*\u51b3", "\u5ba1\\s*\u5224\\s*\u957f[\uff1a:\\s]")
 
   # find_match
   find_first_match <- function(txt, patterns) {
@@ -847,35 +847,33 @@ split_judgment <- function(text) {
   fact_match <- find_first_match(text, fact_patterns)
   reason_match <- regexpr(reason_pattern, text, perl = TRUE)
   reason_start_py <- if (reason_match != -1L) reason_match - 1L else NULL
-  # appendix: two key parts
-  appendix_match <- find_first_match(text, appendix_primary)
-  if (is.null(appendix_match)) {
-    appendix_match <- find_first_match(text, appendix_fallback)
+  # decision: two key parts
+  decision_match <- find_first_match(text, decision_primary)
+  if (is.null(decision_match)) {
+    decision_match <- find_first_match(text, decision_fallback)
   }
-  appendix_start_py <- if (!is.null(appendix_match)) appendix_match[1L] else NULL
+  decision_start_py <- if (!is.null(decision_match)) decision_match[1L] else NULL
 
   # all empty: all in appendix
-  if (is.null(fact_match) && is.null(reason_start_py) && is.null(appendix_start_py)) {
-    return(list(FACTS = "", REASON = "", APPENDIX = trimws(text)))
+  if (is.null(fact_match) && is.null(reason_start_py) && is.null(decision_start_py)) {
+    return(list(FACTS = "", REASON = "", DECISION = trimws(text)))
   }
 
   # get starting and ending point
   fact_start_py <- if (!is.null(fact_match)) fact_match[2L] else 0L
   fact_end_py <- if (!is.null(reason_start_py)) {
     reason_start_py
-  } else if (!is.null(appendix_start_py)) {
-    appendix_start_py
+  } else if (!is.null(decision_start_py)) {
+    decision_start_py
   } else {
     nchar(text)
   }
 
-  reason_end_py <- if (!is.null(appendix_start_py)) appendix_start_py else nchar(text)
+  reason_end_py <- if (!is.null(decision_start_py)) decision_start_py else nchar(text)
 
   # get facts
   facts <- ""
   if (!is.null(fact_match)) {
-    # Python: text[fact_start_py : fact_end_py]
-    # R: substr(text, fact_start_py+1, fact_end_py)
     start_R <- fact_start_py + 1L
     end_R <- fact_end_py
     if (start_R <= end_R) {
@@ -895,18 +893,34 @@ split_judgment <- function(text) {
     reasoning <- trimws(reasoning)
   }
 
-  # get appendix
-  appendix <- ""
-  if (!is.null(appendix_start_py)) {
-    start_R <- appendix_start_py + 1L
+  # get decision
+  decision <- ""
+  if (!is.null(decision_start_py)) {
+    start_R <- decision_start_py + 1L
     end_R <- nchar(text)
     if (start_R <= end_R) {
-      appendix <- substr(text, start_R, end_R)
+      decision <- substr(text, start_R, end_R)
     }
-    appendix <- trimws(appendix)
+    decision <- trimws(decision)
   }
 
-  return(list(FACTS = facts, REASON = reasoning, APPENDIX = appendix))
+  # get legal article
+  laws <- ""
+
+  extract_laws_block <- function(txt) {
+    if (is.null(txt) || nchar(trimws(txt)) == 0L) return("")
+    pattern <- "\u4f9d\u7167\\s*((?:\u300a[^\u300b]+\u300b\\s*\u7b2c[\u96f6\u3007\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341\u767e\u5343\u4e070-9]+\u6761\\s*[\u3001\uff0c]?\\s*)+)"
+    match <- regexec(pattern, txt, perl = TRUE)
+    if (match[[1]][1] == -1) return("")
+    start <- match[[1]][1]
+    end <- start + attr(match[[1]], "match.length") - 1
+    result <- substr(txt, start, end)
+    trimws(result)
+  }
+
+  laws <- extract_laws_block(text)
+
+  return(list(FACTS = facts, REASON = reasoning, DECISION = decision, LAW = laws))
 }
 
 
@@ -945,13 +959,15 @@ split_judgment_df <- function(df, text_col = "document") {
   # get new row
   facts <- vapply(parts_list, `[[`, "FACTS", FUN.VALUE = character(1L))
   reasonings <- vapply(parts_list, `[[`, "REASON", FUN.VALUE = character(1L))
-  appendixes <- vapply(parts_list, `[[`, "APPENDIX", FUN.VALUE = character(1L))
+  decisions <- vapply(parts_list, `[[`, "DECISION", FUN.VALUE = character(1L))
+  laws <- vapply(parts_list, `[[`, "LAW", FUN.VALUE = character(1L))
 
   # write into the df
   result <- df
   result[["FACTS"]] <- facts
   result[["REASON"]] <- reasonings
-  result[["APPENDIX"]] <- appendixes
+  result[["DECISION"]] <- decisions
+  result[["LAWS"]] <- laws
   return(result)
 }
 

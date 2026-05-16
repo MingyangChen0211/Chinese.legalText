@@ -10,26 +10,26 @@ split_judgment(text)
 \item{text}{the document characters.}
 }
 \value{
-`FACTS`, `REASON` and `APPENDIX`.
+`FACTS`, `REASON`, `DECISION` and `LAW`.
 }
 \description{
-This function is to split documents into three parts: "facts", "reasoning", and "appendix".
+This function is to split documents into four parts: "facts", "reasoning", and "decision" and "law".
 This function is only for single case.
-You are required to input a long text, and this function will automatically cut this document into three parts.
-You can use `for` or `lapply` function or use Cutting Function - DataFrame (`split_judgment_df`) to deal with a set of cases
+You are required to input a long text, and this function will automatically cut this document into four parts.
+You can use \code{for} or \code{lapply} function or use Cutting Function - DataFrame (\code{split_judgment_df}) to deal with a set of cases
 As for the cutting logic, please refer to our paper "Judges are trained as good explainers but maligned sentencers: a text similarity approach"
 }
 \section{Unicode Meaning in Examples}{
 
 \tabular{ll}{
  Unicode \tab Meaning \cr
-\\u7ecf\\u5ba1...\\u3002\\ \tab "经审理查明：被告人盗窃。本院认为构成盗窃罪。判决如下：有期徒刑。" \cr
+\\u7ecf\\u5ba1...\\u5211 \tab "经审理查明：盗窃行为。本院认为是犯罪。依照《刑法》第三十条，《刑事诉讼法》第二十条，判决如下:五年有期徒刑" \cr
 }
 }
 
 \examples{
-text <- "\u7ecf\u5ba1\u7406\u67e5\u660e\uff1a\u88ab\u544a\u4eba\u76d7\u7a83\u3002\u672c\u9662\u8ba4\u4e3a\u6784\u6210\u76d7\u7a83\u7f6a\u3002\u5224\u51b3\u5982\u4e0b\uff1a\u6709\u671f\u5f92\u5211\u3002"
+text <- "\u7ecf\u5ba1\u7406\u67e5\u660e\uff1a\u76d7\u7a83\u884c\u4e3a\u3002\u672c\u9662\u8ba4\u4e3a\u662f\u72af\u7f6a\u3002\u4f9d\u7167\u300a\u5211\u6cd5\u300b\u7b2c\u4e09\u5341\u6761\uff0c\u300a\u5211\u4e8b\u8bc9\u8bbc\u6cd5\u300b\u7b2c\u4e8c\u5341\u6761\uff0c\u5224\u51b3\u5982\u4e0b:\u4e94\u5e74\u6709\u671f\u5f92\u5211"
 result <- split_judgment(text)
-print(result$FACTS)
+print(result)
 
 }
