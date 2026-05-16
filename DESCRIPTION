@@ -1,7 +1,7 @@
 Type: Package
 Package: Chinese.legalText
 Title: A Package for Analyzing CJO Criminal Documents
-Version: 1.0.0
+Version: 1.0.1
 Author: Mingyang Chen and Zhipeng Wu
 Maintainer: Mingyang Chen <cmy0211@yeah.net>
 Description: This package is for analyzing criminal sentencing documents. 
